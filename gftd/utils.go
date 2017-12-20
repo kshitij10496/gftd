@@ -25,7 +25,6 @@ func init() {
 			return
 		}
 	}
-
 	err := CreateDB()
 	if err != nil {
 		fmt.Println("Error while creating the database:", err)
@@ -75,10 +74,6 @@ func ReadAllGoals(file io.Reader) ([]Goal, error) {
 	dec := json.NewDecoder(file)
 	if err := dec.Decode(&goals); err != nil && err != io.EOF {
 		return nil, err // TODO: Handle the case of empty file EOF error
-	}
-
-	for i, goal := range goals {
-		fmt.Printf("%d. %v", i, goal)
 	}
 
 	return goals, nil
