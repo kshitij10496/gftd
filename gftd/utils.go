@@ -25,8 +25,8 @@ func init() {
 			return
 		}
 	}
-	err := CreateDB()
-	if err != nil {
+
+	if err := CreateDB(); err != nil {
 		fmt.Println("Error while creating the database:", err)
 	}
 }

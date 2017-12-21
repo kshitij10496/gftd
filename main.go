@@ -1,14 +1,13 @@
 package main
 
 import (
-	//"bufio"
-	//"encoding/json"
-	"fmt"
-	"os"
-	//"strings"
 	"flag"
+	"fmt"
 	"github.com/gosuri/uitable"
 	"github.com/kshitij10496/gftd/gftd"
+	"github.com/manifoldco/promptui"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -19,10 +18,10 @@ func GetTableView(goals []gftd.Goal) *uitable.Table {
 	table.MaxColWidth = 50
 	table.Wrap = true
 	table.Separator = " | "
-	sep := "=================================================="
+
 	// TODO: Find better ways to format
 	table.AddRow("S.No", "Date", "Goal", "Achieved")
-	table.AddRow("====", "================", sep, "========")
+	table.AddRow("====", strings.Repeat("=", 16), strings.Repeat("=", 50), "========")
 	for i, goal := range goals {
 		year, month, day := goal.Timestamp.Date()
 		table.AddRow(i+1, fmt.Sprintf("%d %v %d", day, month, year), goal.Message, goal.Achieved)
@@ -41,8 +40,10 @@ func main() {
 	//                 ii> Different Date: Prompt to check it off
 
 	view := flag.Bool("view", false, "Lists all the goals")
+	//achieved := flag.Bool("a", false, "Mark goals you have achieved")
 	flag.Parse()
 
+	fmt.Println(strings.Repeat("=", 79))
 	file, err := os.Open(gftd.DBFILE)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -61,6 +62,37 @@ func main() {
 		return
 	}
 
+	fmt.Println()
+
+	previousGoal := &goals[len(goals)-1]
+	if !previousGoal.Achieved {
+		year, month, day := previousGoal.Timestamp.Date()
+		previousGoalDate := fmt.Sprintf("%d %v %d", day, month, year)
+
+		l := fmt.Sprintf("Your goal for %s was:", previousGoalDate)
+
+		label := strings.Join([]string{l, previousGoal.Message}, "\n")
+		fmt.Println(label)
+		fmt.Println()
+
+		prompt := promptui.Prompt{
+			Label:     "Have you achieved it",
+			IsConfirm: true,
+		}
+
+		//fmt.Println(previousGoal)
+		_, err := prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Have confidence in yourself. You can do it!\n")
+
+		} else {
+			//fmt.Println(result)
+			fmt.Println("Kudos! More power to you for achieving your goal.")
+			previousGoal.Achieved = true
+		}
+	}
+
 	prompt := "What is your goal for today?"
 	fmt.Println(prompt)
 	message, err := gftd.ReadGoal(os.Stdin)
@@ -76,6 +108,7 @@ func main() {
 	fileWrite, err := os.OpenFile(gftd.DBFILE, os.O_RDWR, 0666)
 	if err != nil {
 		fmt.Println(err)
+
 		os.Exit(1)
 	}
 	defer fileWrite.Close()
@@ -83,7 +116,9 @@ func main() {
 	werr := gftd.WriteAllGoals(fileWrite, goals)
 	if werr != nil {
 		fmt.Println("Unable to write your goal to the database:", werr)
+
 		os.Exit(1)
 	}
 	fmt.Println("Successfully saved your goal")
+	fmt.Println(strings.Repeat("=", 80))
 }
