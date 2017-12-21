@@ -7,11 +7,28 @@ import (
 	"os"
 	//"strings"
 	"flag"
+	"github.com/gosuri/uitable"
 	"github.com/kshitij10496/gftd/gftd"
 	"time"
 )
 
-// func main() {
+// Hacky tabular representation
+//
+func GetTableView(goals []gftd.Goal) *uitable.Table {
+	table := uitable.New()
+	table.MaxColWidth = 50
+	table.Wrap = true
+	table.Separator = " | "
+	sep := "=================================================="
+	// TODO: Find better ways to format
+	table.AddRow("S.No", "Date", "Goal", "Achieved")
+	table.AddRow("====", "================", sep, "========")
+	for i, goal := range goals {
+		year, month, day := goal.Timestamp.Date()
+		table.AddRow(i+1, fmt.Sprintf("%d %v %d", day, month, year), goal.Message, goal.Achieved)
+	}
+	return table
+}
 
 func main() {
 	// 1. Check if database exists
@@ -39,10 +56,8 @@ func main() {
 			fmt.Println("Unable to read:", err)
 			os.Exit(1)
 		}
-		fmt.Println("Number of goals:", len(goals))
-		for i, goal := range goals {
-			fmt.Printf("%d. %v\n", i+1, goal)
-		}
+		table := GetTableView(goals)
+		fmt.Println(table)
 		return
 	}
 
