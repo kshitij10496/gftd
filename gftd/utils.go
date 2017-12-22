@@ -59,8 +59,8 @@ func IsDBExists() (bool, error) {
 
 // Reads all the goals currently in the database
 //
-func ReadAllGoals(file io.Reader) ([]Goal, error) {
-	var goals []Goal
+func ReadAllGoals(file io.Reader) ([]*Goal, error) {
+	var goals []*Goal
 	dec := json.NewDecoder(file)
 	if err := dec.Decode(&goals); err != nil && err != io.EOF {
 		return nil, err // TODO: Handle the case of empty file EOF error
@@ -71,7 +71,7 @@ func ReadAllGoals(file io.Reader) ([]Goal, error) {
 
 // Writes a goal to the database
 //
-func WriteAllGoals(file io.Writer, goals []Goal) error {
+func WriteAllGoals(file io.Writer, goals []*Goal) error {
 	enc := json.NewEncoder(file)
 	return enc.Encode(&goals)
 }
@@ -124,7 +124,7 @@ func isSameDate(time1, time2 time.Time) bool {
 
 // Hacky tabular representation
 //
-func GetTableView(goals []Goal) *uitable.Table {
+func GetTableView(goals []*Goal) *uitable.Table {
 	table := uitable.New()
 	table.MaxColWidth = 50
 	table.Wrap = true
