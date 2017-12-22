@@ -9,12 +9,14 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/gosuri/uitable"
 )
 
 type Goal struct {
-	Message   string    `json:"Message"`
-	Timestamp time.Time `json:"Timestamp"`
-	Achieved  bool      `json:"Achieved"`
+	Message   string    `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
+	Achieved  bool      `json:"achieved"`
 }
 
 var DBFILE = UserHomeDir() + "/.gftd.json"
@@ -130,4 +132,29 @@ func isSameDate(time1, time2 time.Time) bool {
 		return true
 	}
 	return false
+}
+
+// Hacky tabular representation
+//
+func GetTableView(goals []Goal) *uitable.Table {
+	table := uitable.New()
+	table.MaxColWidth = 50
+	table.Wrap = true
+	table.Separator = " | "
+
+	// TODO: Find better ways to format
+	table.AddRow("S.No", "Date", "Goal", "Achieved")
+	table.AddRow("====", strings.Repeat("=", 16), strings.Repeat("=", 50), "========")
+	for i, goal := range goals {
+		year, month, day := goal.Timestamp.Date()
+		goalStatus := func(achieved bool) string {
+			status := "NO"
+			if achieved {
+				status = "YES"
+			}
+			return fmt.Sprintf("%3s", status)
+		}
+		table.AddRow(i+1, fmt.Sprintf("%d %v %d", day, month, year), goal.Message, goalStatus(goal.Achieved))
+	}
+	return table
 }
