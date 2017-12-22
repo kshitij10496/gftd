@@ -6,6 +6,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"sort"
+	"time"
 )
 
 func main() {
@@ -23,7 +24,17 @@ func main() {
 		Aliases: []string{"add"},
 		Usage:   "Add a new goal for today",
 		Action: func(c *cli.Context) error {
-			fmt.Printf("Added the new goal: %v\n", c.Args().First())
+			goal, err := PromptGoal()
+			if err != nil {
+				return fmt.Errorf("Unable to read your goal:", err)
+			}
+
+			werr := WriteGoal(goal)
+			if werr != nil {
+				return fmt.Errorf("Unable to write your goal:", werr)
+			}
+
+			fmt.Printf("Added the new goal: %+v\n", *goal)
 			return nil
 		},
 		ArgsUsage: "[goal text]",
@@ -107,4 +118,37 @@ func InitApp() error {
 	}
 
 	return nil
+}
+
+func PromptGoal() (*gftd.Goal, error) {
+	prompt := "What is your goal for today?"
+	fmt.Println(prompt)
+	message, err := gftd.ReadGoal(os.Stdin)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gftd.Goal{message, time.Now(), false}, nil
+}
+
+func WriteGoal(goal *gftd.Goal) error {
+	file, err := os.Open(gftd.DBFILE)
+	if err != nil {
+		return err
+	}
+
+	goals, err := gftd.ReadAllGoals(file)
+	if err != nil {
+		return err
+	}
+	file.Close()
+
+	wfile, err := os.OpenFile(gftd.DBFILE, os.O_RDWR, 0666)
+	if err != nil {
+		return err
+	}
+	defer wfile.Close()
+
+	goals = append(goals, *goal)
+	return gftd.WriteAllGoals(wfile, goals)
 }
