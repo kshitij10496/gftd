@@ -14,7 +14,7 @@ func main() {
 		Usage: "Initializes the gftd application",
 		Action: func(c *cli.Context) error {
 			fmt.Printf("Initialized the application at: %s\n", gftd.UserHomeDir())
-			return nil
+			return InitApp()
 		},
 	}
 
@@ -32,9 +32,23 @@ func main() {
 	logCommand := &cli.Command{
 		Name:  "log",
 		Usage: "View your entire goal log",
+		Before: func(c *cli.Context) error {
+			exists, err := gftd.IsDBExists()
+			if !exists || err != nil {
+				e := fmt.Errorf("You need to initialize the application using:\n $ gftd init\n")
+				fmt.Println(e)
+				return e // TODO: Find a way to disable help text
+			}
+
+			fmt.Fprintf(c.App.Writer, "Fetching your goals\n") // TODO: Add a progress bar
+			return nil
+		},
 		Action: func(c *cli.Context) error {
-			fmt.Printf("Here are all of your goals\n")
-			return ViewGoals()
+			if err := ViewGoals(); err != nil {
+				fmt.Println(err)
+				return err
+			}
+			return nil
 		},
 	}
 
@@ -77,5 +91,20 @@ func ViewGoals() error {
 
 	table := gftd.GetTableView(goals)
 	fmt.Println(table)
+	return nil
+}
+
+func InitApp() error {
+	if exists, err := gftd.IsDBExists(); exists {
+		if err == nil {
+			fmt.Println("The application has already been initialized.")
+			return nil
+		}
+	}
+
+	if err := gftd.CreateDB(); err != nil {
+		return fmt.Errorf("Error while setting up the database:", err)
+	}
+
 	return nil
 }

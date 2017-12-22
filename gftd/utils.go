@@ -21,18 +21,6 @@ type Goal struct {
 
 var DBFILE = UserHomeDir() + "/.gftd.json"
 
-func init() {
-	if exists, err := IsDBExists(); exists {
-		if err == nil {
-			return
-		}
-	}
-
-	if err := CreateDB(); err != nil {
-		fmt.Println("Error while creating the database:", err)
-	}
-}
-
 func UserHomeDir() string {
 	if runtime.GOOS == "windows" {
 		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
