@@ -11,6 +11,16 @@ import (
 	"time"
 )
 
+const LOGO = `
+	        __ _      _
+	  __ _ / _| |_ __| |
+	 / _  | |_| __/ _  |
+	| (_| |  _| || (_| |
+	 \__/ |_|  \__\____|
+	 |___/
+
+`
+
 func main() {
 	initCommand := &cli.Command{
 		Name:  "init",
@@ -31,12 +41,17 @@ func main() {
 				return fmt.Errorf("Unable to read your goal:", err)
 			}
 
+			if goal.Message == "" {
+				fmt.Println("Don't be afraid to commit to your goal. You can do it.")
+				return fmt.Errorf("Empty goal message")
+			}
+
 			werr := WriteGoal(goal)
 			if werr != nil {
 				return fmt.Errorf("Unable to write your goal:", werr)
 			}
 
-			fmt.Printf("Added the new goal: %+v\n", *goal)
+			fmt.Println("\nNow that you have committed to your goal, go get it!")
 			return nil
 		},
 		ArgsUsage: "[goal text]",
@@ -65,8 +80,8 @@ func main() {
 		},
 	}
 
-	achievedCommand := &cli.Command{
-		Name:  "achieved",
+	achieveCommand := &cli.Command{
+		Name:  "achieve",
 		Usage: "Mark a goal as achieved",
 		Action: func(c *cli.Context) error {
 			err := AchieveGoal()
@@ -74,21 +89,25 @@ func main() {
 				fmt.Println(err)
 				return err
 			}
-			fmt.Printf("You have successfully achieved your goal number: %v\n", c.Args().First())
+			fmt.Printf("You have achieved an important goal. More power to you!\n")
 			return nil
 		},
 	}
 
 	app := cli.NewApp()
-	app.Commands = []cli.Command{*initCommand, *newCommand, *logCommand, *achievedCommand}
+	app.Name = "gftd"
+	app.HelpName = "gftd"
+	app.Usage = "A tool to track your daily goals"
+	//app.Description = "Your daily goal planner"
+	app.Commands = []cli.Command{*initCommand, *newCommand, *logCommand, *achieveCommand}
 
 	app.Before = func(c *cli.Context) error {
-		fmt.Fprintf(c.App.Writer, "Welcome to GFTD!\n") // TODO: Put ASCII art
+		fmt.Fprintf(c.App.Writer, LOGO)
 		return nil
 	}
 
 	app.After = func(c *cli.Context) error {
-		fmt.Fprintf(c.App.Writer, "Let's get working!\n") // TODO: Add a motivation quote
+		// fmt.Fprintf(c.App.Writer, "Let's get working!\n") TODO: Add a motivation quote
 		return nil
 	}
 	sort.Sort(cli.CommandsByName(app.Commands))
@@ -131,8 +150,9 @@ func InitApp() error {
 }
 
 func PromptGoal() (*gftd.Goal, error) {
-	prompt := "What is your goal for today?"
+	prompt := fmt.Sprintf("%s: %s", "gftd", "What is your goal for today?")
 	fmt.Println(prompt)
+	fmt.Printf("%4s: ", "me")
 	message, err := gftd.ReadGoal(os.Stdin)
 	if err != nil {
 		return nil, err
@@ -200,10 +220,10 @@ func AchieveGoal() error {
 		Size:  10,
 	}
 
-	i, s, e := selectGoal.Run()
-	fmt.Println("I:", i)
-	fmt.Println("S:", s)
-	fmt.Println("E:", e)
+	_, s, e := selectGoal.Run()
+	if e != nil {
+		return e
+	}
 
 	for _, g := range goals {
 		if g.Message == s {
