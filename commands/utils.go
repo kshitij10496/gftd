@@ -1,4 +1,4 @@
-package gftd
+package commands
 
 import (
 	"bufio"
