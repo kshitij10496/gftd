@@ -1,4 +1,4 @@
-package commands
+package cmd
 
 import (
 	"fmt"
@@ -32,9 +32,13 @@ func LogCommand() *cli.Command {
 }
 
 func ViewGoals() error {
-	goals, err := GetGoals()
+	goals, err := ReadAllGoals()
 	if err != nil {
 		return err
+	}
+
+	if len(goals) == 0 {
+		return fmt.Errorf("No goals have been added yet")
 	}
 	table := GetTableView(goals)
 	fmt.Println(table)

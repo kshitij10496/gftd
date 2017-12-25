@@ -1,8 +1,7 @@
-package commands
+package cmd
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
@@ -14,6 +13,16 @@ func AchieveCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "achieve",
 		Usage: "Mark a goal as achieved",
+		Before: func(c *cli.Context) error {
+			exists, err := IsDBExists()
+			if !exists || err != nil {
+				e := fmt.Errorf("You need to initialize the application using:\n $ gftd init\n")
+				fmt.Println(e)
+				return e // TODO: Find a way to disable help text
+			}
+			// TODO: Check for number of goals in the database
+			return nil
+		},
 		Action: func(c *cli.Context) error {
 			err := AchieveGoal()
 			if err != nil {
@@ -33,7 +42,7 @@ func AchieveGoal() error {
 	goal = strings.TrimSpace(strings.ToLower(goal))
 
 	goalWords := strings.Fields(goal)
-	goals, err := GetGoals()
+	goals, err := ReadAllGoals()
 	if err != nil {
 		return err
 	}
@@ -74,19 +83,7 @@ func AchieveGoal() error {
 		return e
 	}
 
-	for _, g := range goals {
-		if g.Message == s {
-			g.Achieved = true
-		}
-	}
-
-	file, err := os.OpenFile(DBFILE, os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	return WriteAllGoals(file, goals)
+	return UpdateGoal(s)
 }
 
 func rankByWordCount(wordFrequencies map[string]int) PairList {

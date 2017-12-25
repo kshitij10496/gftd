@@ -1,4 +1,4 @@
-package commands
+package cmd
 
 import (
 	"fmt"
@@ -11,8 +11,13 @@ func InitCommand() *cli.Command {
 		Name:  "init",
 		Usage: "Initializes the gftd application",
 		Action: func(c *cli.Context) error {
-			fmt.Printf("Initialized the application at: %s\n", UserHomeDir())
-			return InitAction()
+			err := InitAction()
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Initialized the application at: %s\n", DBFILE)
+			return nil
 		},
 	}
 }
@@ -20,14 +25,16 @@ func InitCommand() *cli.Command {
 func InitAction() error {
 	if exists, err := IsDBExists(); exists {
 		if err == nil {
-			fmt.Println("The application has already been initialized.")
-			return nil
+			e := fmt.Errorf("The application has already been initialized.")
+			fmt.Println(e)
+			return e
 		}
 	}
 
 	if err := CreateDB(); err != nil {
-		return fmt.Errorf("Error while setting up the database:", err)
+		e := fmt.Errorf("Error while setting up the database:", err)
+		fmt.Println(e)
+		return e
 	}
-
 	return nil
 }

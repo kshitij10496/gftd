@@ -1,4 +1,4 @@
-package commands
+package cmd
 
 import (
 	"fmt"
@@ -13,6 +13,15 @@ func NewCommand() *cli.Command {
 		Name:    "new",
 		Aliases: []string{"add"},
 		Usage:   "Add a new goal for today",
+		Before: func(c *cli.Context) error {
+			exists, err := IsDBExists()
+			if !exists || err != nil {
+				e := fmt.Errorf("You need to initialize the application using:\n $ gftd init\n")
+				fmt.Println(e)
+				return e // TODO: Find a way to disable help text
+			}
+			return nil
+		},
 		Action: func(c *cli.Context) error {
 			goal, err := PromptGoal()
 			if err != nil {
@@ -26,7 +35,9 @@ func NewCommand() *cli.Command {
 
 			werr := WriteGoal(goal)
 			if werr != nil {
-				return fmt.Errorf("Unable to write your goal:", werr)
+				er := fmt.Errorf("Unable to write your goal:", werr)
+				fmt.Println(er)
+				return er
 			}
 
 			fmt.Println("\nNow that you have committed to your goal, go get it!")
@@ -46,30 +57,4 @@ func PromptGoal() (*Goal, error) {
 	}
 
 	return &Goal{message, time.Now(), false}, nil
-}
-
-func WriteGoal(goal *Goal) error {
-	goals, err := GetGoals()
-	if err != nil {
-		return nil
-	}
-
-	wfile, err := os.OpenFile(DBFILE, os.O_RDWR, 0666)
-	if err != nil {
-		return err
-	}
-	defer wfile.Close()
-
-	goals = append(goals, goal)
-	return WriteAllGoals(wfile, goals)
-}
-
-func GetGoals() ([]*Goal, error) {
-	file, err := os.Open(DBFILE)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	return ReadAllGoals(file)
 }
