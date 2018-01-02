@@ -27,7 +27,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "gftd"
-	app.Version = "0.0.1"
+	app.Version = "0.1.0"
 	app.HelpName = "gftd"
 	app.Usage = "A tool to track your daily goals"
 	app.Commands = []cli.Command{*initCommand, *newCommand, *logCommand, *achieveCommand}
