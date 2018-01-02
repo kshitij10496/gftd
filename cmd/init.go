@@ -12,8 +12,9 @@ func InitCommand() *cli.Command {
 		Usage: "Initializes the gftd application",
 		Before: func(c *cli.Context) error {
 			if exists, err := IsDBExists(); exists || err != nil {
-				e := fmt.Errorf("The application has already been initialized.")
-				fmt.Println(e)
+				msg := "The application has already been initialized."
+				e := fmt.Errorf(msg)
+				GREEN.Println(msg)
 				return e // TODO: Do not show the help text
 			}
 			return nil
@@ -21,10 +22,10 @@ func InitCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			err := InitAction()
 			if err != nil {
-				fmt.Println(err)
+				RED.Println(err)
 				return err
 			}
-			fmt.Printf("Initialized the application at: %s\n", DBFILE)
+			GREEN.Printf("Initialized the application at: %s\n", DBFILE)
 			return nil
 		},
 	}

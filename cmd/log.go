@@ -14,7 +14,7 @@ func LogCommand() *cli.Command {
 			exists, err := IsDBExists()
 			if !exists || err != nil {
 				e := fmt.Errorf("You need to initialize the application using:\n $ gftd init\n")
-				fmt.Println(e)
+				RED.Println(e)
 				return e // TODO: Find a way to disable help text
 			}
 			fmt.Fprintf(c.App.Writer, "Fetching your goals\n") // TODO: Add a progress bar
@@ -22,7 +22,7 @@ func LogCommand() *cli.Command {
 		},
 		Action: func(c *cli.Context) error {
 			if err := ViewGoals(); err != nil {
-				fmt.Println(err)
+				RED.Println(err)
 				return err
 			}
 			return nil

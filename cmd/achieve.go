@@ -17,7 +17,7 @@ func AchieveCommand() *cli.Command {
 			exists, err := IsDBExists()
 			if !exists || err != nil {
 				e := fmt.Errorf("You need to initialize the application using:\n $ gftd init\n")
-				fmt.Println(e)
+				RED.Println(e)
 				return e // TODO: Find a way to disable help text
 			}
 			// TODO: Check for number of goals in the database
@@ -26,10 +26,10 @@ func AchieveCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			err := AchieveGoal()
 			if err != nil {
-				fmt.Println(err)
+				RED.Println(err)
 				return err
 			}
-			fmt.Printf("You have achieved an important goal. More power to you!\n")
+			GREEN.Printf("You have achieved an important goal. More power to you!\n")
 			return nil
 		},
 	}

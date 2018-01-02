@@ -17,7 +17,7 @@ func NewCommand() *cli.Command {
 			exists, err := IsDBExists()
 			if !exists || err != nil {
 				e := fmt.Errorf("You need to initialize the application using:\n $ gftd init\n")
-				fmt.Println(e)
+				RED.Println(e)
 				return e // TODO: Find a way to disable help text
 			}
 			return nil
@@ -29,18 +29,18 @@ func NewCommand() *cli.Command {
 			}
 
 			if goal.Message == "" {
-				fmt.Println("Don't be afraid to commit to your goal. You can do it.")
+				RED.Println("Don't be afraid to commit to your goal. You can do it.")
 				return fmt.Errorf("Empty goal message")
 			}
 
 			werr := WriteGoal(goal)
 			if werr != nil {
 				er := fmt.Errorf("Unable to write your goal:", werr)
-				fmt.Println(er)
+				RED.Println(er)
 				return er
 			}
 
-			fmt.Println("\nNow that you have committed to your goal, go get it!")
+			GREEN.Println("\nNow that you have committed to your goal, go get it!")
 			return nil
 		},
 		ArgsUsage: "[goal text]",
