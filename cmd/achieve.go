@@ -36,6 +36,7 @@ func AchieveCommand() *cli.Command {
 }
 
 func AchieveGoal() error {
+	// TODO: Check if any goals exist before prompting
 	goalPrompt := promptui.Prompt{Label: "Enter the goal"}
 	goal, err := goalPrompt.Run()
 

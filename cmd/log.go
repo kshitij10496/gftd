@@ -17,7 +17,6 @@ func LogCommand() *cli.Command {
 				fmt.Println(e)
 				return e // TODO: Find a way to disable help text
 			}
-
 			fmt.Fprintf(c.App.Writer, "Fetching your goals\n") // TODO: Add a progress bar
 			return nil
 		},
@@ -36,10 +35,10 @@ func ViewGoals() error {
 	if err != nil {
 		return err
 	}
-
 	if len(goals) == 0 {
 		return fmt.Errorf("No goals have been added yet")
 	}
+
 	table := GetTableView(goals)
 	fmt.Println(table)
 	return nil
