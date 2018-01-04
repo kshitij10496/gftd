@@ -36,13 +36,14 @@ func main() {
 		fmt.Fprintf(c.App.Writer, LOGO)
 		return nil
 	}
-
-	/* TODO: Add a motivational quote here
 	app.After = func(c *cli.Context) error {
-
+		quote, err := cmd.GetMotivationalQuote()
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(c.App.Writer, quote)
 		return nil
 	}
-	*/
 
 	sort.Sort(cli.CommandsByName(app.Commands))
 	app.Run(os.Args)
